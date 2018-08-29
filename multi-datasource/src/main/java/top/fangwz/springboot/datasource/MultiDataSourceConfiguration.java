@@ -1,6 +1,7 @@
 package top.fangwz.springboot.datasource;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -9,6 +10,10 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(MultiDataSourceProperties.class)
-public class MultiDataSourceAutoConfiguration {
+public class MultiDataSourceConfiguration {
 
+  @Bean
+  public MultiDataSourceRegistryPostProcessor multiDataSourceRegistryPostProcessor() {
+    return new MultiDataSourceRegistryPostProcessor();
+  }
 }
