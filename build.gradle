@@ -50,6 +50,31 @@ subprojects {
         println test.reports.html.entryPoint
     }
 
+    apply plugin: "maven-publish"
+    afterEvaluate {
+        task sourcesJar(type: Jar) {
+            from sourceSets.main.allJava
+            classifier = 'sources'
+        }
+        publishing.publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifactId project.archivesBaseName
+                version project.version
+
+                artifact sourcesJar
+            }
+        }
+        task local {
+            dependsOn publishToMavenLocal
+            doLast {
+                def pub = publishing.publications.mavenJava
+                println "artifact: ${pub.groupId}:${pub.artifactId}:${pub.version}"
+            }
+        }
+    }
+
+
     dependencies {
 
         // Nullable & NonNull
