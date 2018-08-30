@@ -1,5 +1,7 @@
 package top.fangwz.springboot.datasource;
 
+import com.google.common.base.Splitter;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -32,7 +37,10 @@ public class TestMultiDataSource {
   private MultiDataSourceProperties properties;
   @Autowired
   @Qualifier("aJdbcTemplate")
-  private JdbcTemplate jdbcTemplate;
+  private JdbcTemplate aJdbcTemplate;
+  @Autowired
+  @Qualifier("bJdbcTemplate")
+  private JdbcTemplate bJdbcTemplate;
 
   @Test
   public void testProperties() {
@@ -40,8 +48,18 @@ public class TestMultiDataSource {
   }
 
   @Test
-  public void testJdbcTemplate() {
-    Map<String, Object> map = jdbcTemplate.queryForMap("select * from ti where i =21");
-    System.out.println(map);
+  public void testJdbcTemplate() throws IOException {
+    String initSql = readInitSql();
+    Splitter.on(";").trimResults().omitEmptyStrings().split(initSql)
+        .forEach(sql -> aJdbcTemplate.execute(sql));
+    Map<String, Object> map = aJdbcTemplate.queryForMap("select * from user where id =1");
+    assertEquals("a", map.get("name"));
+  }
+
+  private String readInitSql() throws IOException {
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("init.sql");
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    IOUtils.copy(inputStream, outputStream);
+    return new String(outputStream.toByteArray());
   }
 }

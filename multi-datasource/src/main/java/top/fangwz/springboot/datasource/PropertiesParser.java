@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 
+import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.Set;
 
@@ -55,6 +56,7 @@ public class PropertiesParser {
     return dataSourceProperties;
   }
 
+  @SuppressWarnings("unchecked")
   private void setDataSourceProperties(DataSourceProperties dataSourceProperties, String propName,
       String propValue) {
     // TODO: use spring-way to set property
@@ -71,6 +73,12 @@ public class PropertiesParser {
       case "driver-class-name":
         dataSourceProperties.setDriverClassName(propValue);
         break;
+      case "type":
+        try {
+          dataSourceProperties.setType((Class<? extends DataSource>) Class.forName(propValue));
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException(e);
+        }
       default:
         break;
     }
