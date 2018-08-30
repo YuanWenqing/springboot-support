@@ -1,5 +1,6 @@
 package top.fangwz.springboot.datasource;
 
+import org.h2.util.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -32,7 +37,10 @@ public class TestMultiDataSource {
   private MultiDataSourceProperties properties;
   @Autowired
   @Qualifier("aJdbcTemplate")
-  private JdbcTemplate jdbcTemplate;
+  private JdbcTemplate aJdbcTemplate;
+  @Autowired
+  @Qualifier("bJdbcTemplate")
+  private JdbcTemplate bJdbcTemplate;
 
   @Test
   public void testProperties() {
@@ -40,8 +48,21 @@ public class TestMultiDataSource {
   }
 
   @Test
-  public void testJdbcTemplate() {
-    Map<String, Object> map = jdbcTemplate.queryForMap("select * from ti where i =21");
+  public void testJdbcTemplate() throws IOException {
+    String sql = initSql();
+    aJdbcTemplate.execute(sql);
+    aJdbcTemplate.execute(
+        "create table user (`id` BIGINT(20) NOT NULL AUTO_INCREMENT,`name` VARCHAR(20) DEFAULT 0,)");
+    List<String> list = aJdbcTemplate.queryForList("show tables;", String.class);
+    System.out.println(list);
+    Map<String, Object> map = aJdbcTemplate.queryForMap("select * from user where id =1");
     System.out.println(map);
+  }
+
+  private String initSql() throws IOException {
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("init.sql");
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    IOUtils.copy(inputStream, outputStream);
+    return new String(outputStream.toByteArray());
   }
 }
