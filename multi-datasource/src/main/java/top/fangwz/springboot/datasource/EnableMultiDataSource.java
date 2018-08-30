@@ -27,16 +27,17 @@ import java.lang.annotation.*;
 @Documented
 @Import({MultiDataSourceConfiguration.class, MultiDataSourceImportRegistrar.class})
 public @interface EnableMultiDataSource {
+  String DEFAULT_LOCATION = "classpath:application.properties";
 
   /**
    * 配置文件地址
    */
-  String location() default "classpath:application.properties";
+  String location() default DEFAULT_LOCATION;
 
   /**
    * 配置项前缀
    */
-  String prefix() default "top.fangwz.springboot.datasource.multi";
+  String prefix() default MultiDataSourceProperties.PROPERTIES_PREFIX;
 
   /**
    * 处理配置文件的类
