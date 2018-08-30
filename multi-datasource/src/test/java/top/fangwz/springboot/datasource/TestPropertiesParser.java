@@ -57,4 +57,30 @@ public class TestPropertiesParser {
       System.out.println(e.getClass() + ": " + e.getMessage());
     }
   }
+
+  @Test
+  public void testIllegalPrefix() {
+    PropertiesParser parser = new PropertiesParser();
+    try {
+      parser.setPrefix(null);
+      fail();
+    } catch (NullPointerException e) {
+    }
+    try {
+      parser.setPrefix("a b");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+    try {
+      parser.setPrefix(".");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+    try {
+      parser.setPrefix("a.");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+
+  }
 }
