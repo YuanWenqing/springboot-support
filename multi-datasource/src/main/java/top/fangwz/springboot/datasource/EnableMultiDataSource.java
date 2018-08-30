@@ -11,6 +11,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(MultiDataSourceConfiguration.class)
+@Import({MultiDataSourceConfiguration.class, MultiDataSourceRegistryPostProcessor.class})
 public @interface EnableMultiDataSource {
+
 }

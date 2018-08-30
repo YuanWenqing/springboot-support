@@ -19,4 +19,6 @@ dependencies {
     // test
     testImplementation('org.springframework:spring-test:5.0.7.RELEASE')
     testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testImplementation('mysql:mysql-connector-java:6.0.6')
+    testImplementation('com.zaxxer:HikariCP:2.7.9')
 }

@@ -2,13 +2,14 @@ package top.fangwz.springboot.datasource;
 
 import com.google.common.base.Suppliers;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -21,31 +22,32 @@ import java.util.Map;
  * @author: yuanwq
  * @date: 2018/8/29
  */
-public class MultiDataSourceRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
-  private MultiDataSourceProperties properties;
-
-  @Autowired
-  public void setProperties(MultiDataSourceProperties properties) {
-    this.properties = properties;
-  }
+public class MultiDataSourceRegistryPostProcessor implements ImportBeanDefinitionRegistrar {
 
   @Override
-  public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
-      throws BeansException {
-    if (properties == null) {
-      return;
-    }
+  public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+      BeanDefinitionRegistry registry) {
+    MultiDataSourceProperties properties = new MultiDataSourceProperties();
+    DataSourceProperties dataSourceProperties = new DataSourceProperties();
+    dataSourceProperties.setUrl("jdbc:mysql://localhost:3306/test");
+    dataSourceProperties.setUsername("test");
+    dataSourceProperties.setPassword("123456");
+    dataSourceProperties.setDriverClassName("com.mysql.cj.jdbc.Driver");
+    properties.addDataSourceProperties("a", dataSourceProperties);
     for (Map.Entry<String, DataSourceProperties> entry : properties.getMulti().entrySet()) {
-      String beanName = entry.getKey() + "DataSource";
+      String dataSourceName = entry.getKey() + "DataSource";
       DataSource dataSource = entry.getValue().initializeDataSourceBuilder().build();
-      BeanDefinition beanDefinition = BeanDefinitionBuilder
+      BeanDefinition dataSourceBean = BeanDefinitionBuilder
           .genericBeanDefinition(DataSource.class, Suppliers.ofInstance(dataSource))
           .getBeanDefinition();
-      registry.registerBeanDefinition(beanName, beanDefinition);
+      registry.registerBeanDefinition(dataSourceName, dataSourceBean);
+      BeanDefinition jdbcBean = BeanDefinitionBuilder.genericBeanDefinition(JdbcTemplate.class)
+          .addConstructorArgReference(dataSourceName).getBeanDefinition();
+      String jdbcName = entry.getKey() + "JdbcTemplate";
+      registry.registerBeanDefinition(jdbcName, jdbcBean);
     }
   }
 
-  @Override
   public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
       throws BeansException {
   }
