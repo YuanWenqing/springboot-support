@@ -34,18 +34,11 @@ public class TestMultiDataSource {
   }
 
   @Autowired
-  private MultiDataSourceProperties properties;
-  @Autowired
   @Qualifier("aJdbcTemplate")
   private JdbcTemplate aJdbcTemplate;
   @Autowired
   @Qualifier("bJdbcTemplate")
   private JdbcTemplate bJdbcTemplate;
-
-  @Test
-  public void testProperties() {
-    assertEquals(2, properties.getMulti().size());
-  }
 
   @Test
   public void testJdbcTemplate() throws IOException {

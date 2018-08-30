@@ -1,6 +1,5 @@
 package top.fangwz.springboot.datasource;
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -8,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
  * @date: 2018/8/28
  */
 @Configuration
-@EnableConfigurationProperties(MultiDataSourceProperties.class)
 public class MultiDataSourceConfiguration {
 
 }
