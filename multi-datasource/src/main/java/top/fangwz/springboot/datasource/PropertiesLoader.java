@@ -12,7 +12,5 @@ import java.util.Properties;
 public interface PropertiesLoader {
   void setResourceLoader(ResourceLoader resourceLoader);
 
-  void setLocation(String location);
-
-  Properties load() throws IOException;
+  Properties load(String location) throws IOException;
 }

@@ -53,7 +53,7 @@ public class MultiDataSourceImportRegistrar
     PropertiesLoader loader = createLoader(attributes);
     Properties properties;
     try {
-      properties = loader.load();
+      properties = loader.load((String) attributes.get("location"));
     } catch (IOException e) {
       // TODO: find a proper spring exception
       throw new RuntimeException("fail to load multi-datasource properties configuration", e);
@@ -75,7 +75,6 @@ public class MultiDataSourceImportRegistrar
       // TODO: find a proper spring exception
       throw new RuntimeException("fail to instantiate a loader: " + loaderClass.getName(), e);
     }
-    loader.setLocation((String) attributes.get("location"));
     loader.setResourceLoader(resourceLoader);
     return loader;
   }

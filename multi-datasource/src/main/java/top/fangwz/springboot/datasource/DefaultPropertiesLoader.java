@@ -1,6 +1,7 @@
 package top.fangwz.springboot.datasource;
 
 import lombok.Setter;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
@@ -14,11 +15,10 @@ import java.util.Properties;
  */
 @Setter
 public class DefaultPropertiesLoader implements PropertiesLoader {
-  private ResourceLoader resourceLoader;
-  private String location;
+  private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
   @Override
-  public Properties load() throws IOException {
+  public Properties load(String location) throws IOException {
     Resource resource = resourceLoader.getResource(location);
     if (!resource.exists()) {
       throw new IOException("fail to load resource: " + location);
