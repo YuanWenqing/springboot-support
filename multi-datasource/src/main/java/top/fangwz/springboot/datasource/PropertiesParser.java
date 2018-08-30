@@ -1,7 +1,6 @@
 package top.fangwz.springboot.datasource;
 
 import com.google.common.collect.Sets;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 
@@ -15,11 +14,17 @@ import static com.google.common.base.Preconditions.*;
  * @author: yuanwq
  * @date: 2018/8/30
  */
-@Setter
 public class PropertiesParser {
   private static final String DOT = ".";
 
-  private String prefix;
+  private String prefix = StringUtils.EMPTY;
+
+  public void setPrefix(String prefix) {
+    checkNotNull(prefix);
+    checkArgument(!StringUtils.containsWhitespace(prefix));
+    checkArgument(!prefix.startsWith(DOT) && !prefix.endsWith(DOT));
+    this.prefix = prefix;
+  }
 
   private Set<String> findAllNames(Properties properties) {
     Set<String> names = Sets.newLinkedHashSet();
