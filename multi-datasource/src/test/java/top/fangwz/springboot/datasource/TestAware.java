@@ -2,6 +2,7 @@ package top.fangwz.springboot.datasource;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,6 +72,8 @@ public class TestAware {
   @Autowired
   @Qualifier("bJdbcTemplate")
   private JdbcTemplate bJdbcTemplate;
+  @Autowired
+  private DataSourceRoutingPostProcessor dataSourceRoutingPostProcessor;
 
   @Test
   public void testDataSourceAware() {
@@ -82,5 +85,21 @@ public class TestAware {
   public void testJdbcTemplateAware() {
     assertNotNull(jdbcTemplateAwareBean.jdbcTemplate);
     assertEquals(bJdbcTemplate, jdbcTemplateAwareBean.jdbcTemplate);
+  }
+
+  @DataSourceRouting("a")
+  public class NotOfRequiredTypeBean {
+
+  }
+
+  @Test
+  public void testNotOfRequiredType() {
+    try {
+      NotOfRequiredTypeBean bean = new NotOfRequiredTypeBean();
+      dataSourceRoutingPostProcessor
+          .postProcessBeforeInitialization(bean, bean.getClass().getName());
+    } catch (BeanNotOfRequiredTypeException e) {
+      System.err.println(e.getMessage());
+    }
   }
 }

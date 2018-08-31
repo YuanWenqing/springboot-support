@@ -5,6 +5,9 @@ package top.fangwz.springboot.datasource;
  * @date: 2018/8/31
  */
 public class DataSourceUtils {
+  private DataSourceUtils() {
+  }
+
   private static final String SUFFIX_DATA_SOURCE = "DataSource";
   private static final String SUFFIX_JDBC_TEMPLATE = "JdbcTemplate";
 
