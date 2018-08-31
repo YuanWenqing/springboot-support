@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MethodInvocationException;
-import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -57,7 +56,9 @@ class DataSourceRoutingPostProcessor implements BeanPostProcessor, ApplicationCo
       boolean jtSet = trySet(bean, SETTER_JDBC_TEMPLATE, jdbcTemplate);
       if (!dsSet && !jtSet) {
         // no way to set, trigger an exception for unhandled DataSourceRouting annotation
-        throw new BeanNotOfRequiredTypeException(beanName, RoutingAware.class, bean.getClass());
+        // TODO use a proper spring exception
+        throw new RuntimeException("no way to set a DataSource or JdbcTemplate to bean " + bean,
+            null);
       }
     }
     return bean;
