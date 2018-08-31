@@ -14,7 +14,7 @@ buildscript {
 
 ext {
     springBootVersion = '2.0.3.RELEASE'
-    springVersion = '5.7.0.RELEASE'
+    springVersion = '5.0.7.RELEASE'
 }
 
 // project setting
@@ -39,7 +39,15 @@ subprojects {
     apply plugin: "jacoco"
 
     jar << {
-        println jar.archivePath
+        // println jar.archivePath
+    }
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        from sourceSets.main.allJava
+        classifier = 'sources'
+    }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
     }
 
     jacocoTestReport.dependsOn(test)
@@ -53,10 +61,6 @@ subprojects {
 
     apply plugin: "maven-publish"
     afterEvaluate {
-        task sourcesJar(type: Jar) {
-            from sourceSets.main.allJava
-            classifier = 'sources'
-        }
         publishing.publications {
             mavenJava(MavenPublication) {
                 from components.java
@@ -66,12 +70,14 @@ subprojects {
                 artifact sourcesJar
             }
         }
-        task local {
-            dependsOn publishToMavenLocal
+        publishToMavenLocal {
             doLast {
                 def pub = publishing.publications.mavenJava
                 println "artifact: ${pub.groupId}:${pub.artifactId}:${pub.version}"
             }
+        }
+        task local {
+            dependsOn publishToMavenLocal
         }
     }
 
