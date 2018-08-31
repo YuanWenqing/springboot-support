@@ -34,7 +34,7 @@ public class DataSourceRoutingPostProcessor implements BeanPostProcessor, Applic
       return bean;
     }
     checkArgument(
-        StringUtils.isNotBlank(routing.value()) && StringUtils.containsWhitespace(routing.value()),
+        StringUtils.isNotBlank(routing.value()) && !StringUtils.containsWhitespace(routing.value()),
         "Illegal datasource name: " + routing.value() + " on " + bean.getClass().getName());
     if (bean instanceof JdbcTemplateAware) {
       JdbcTemplate jdbcTemplate = findJdbcTemplate(routing.value());
