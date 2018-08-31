@@ -5,18 +5,14 @@ some extended supports for SpringBoot
 
 Support multi-datasource for SpringBoot.
 
-### EnableMultiDataSource
+### How To Enable Multi-DataSource Support?
 
-* `location`: location of configuration properties, default `classpath:application.properties`
-* `prefix`: prefix of configuration, default `multi-datasource.multi`
-* `loader`: class of loader to load configuration properties, default `DefaultPropertiesLoader`; If some ConfigurationService, like Spring Cloud Config or Aliyun ACM, is in use, developer can change `loader` to a customized loader class implementing `PropertiesLoader` interface  
-
-To enable multi-datasource support, just do it in a SpringBoot way:
+Just do it in a SpringBoot way:
 
 ~~~java
-@EnableMultiDataSource(location="classpath:")
+@EnableMultiDataSource
 public class Configuration {
-  // beans
+  // code...
 }
 ~~~
 
@@ -24,13 +20,19 @@ or
 
 ~~~java
 @SpringBootApplication
-@EnableMultiDataSource(location="classpath:")
+@EnableMultiDataSource
 public class XXXApplication {
-  // beans
+  // code..
 }
 ~~~
 
-### Configuration
+In purpose to customize your configuration of multi-datasource, you can change:
+
+* `location`: location of configuration properties, default `classpath:application.properties`.
+* `prefix`: prefix of configuration, default `multi-datasource.multi`.
+* `loader`: class of loader to load configuration properties, default `DefaultPropertiesLoader`; If some ConfigurationService, like Spring Cloud Config or Aliyun ACM, is in use, change `loader` to a customized loader class implementing `PropertiesLoader` interface to load in your way  
+
+### How To Configure Multi-DataSource?
 
 Configuration will be parsed by `PropertiesParser`. As a convention, every item will be treated in a `<prefix>.<name>.<property>` pattern:
 
@@ -59,6 +61,6 @@ This will lead to construction of:
 * 2 `DataSource`s with bean names: `aDataSource` and `bDataSource`
 * 2 `JdbcTemplate`s with bean names: `aJdbcTemplate` and `bJdbcTemplate`
 
-### Others
+### Others You May Need To Know
 
 Type of DataSource will be determined by SpringBoot automatically, just like `spring-boot-starter-jdbc` does.
