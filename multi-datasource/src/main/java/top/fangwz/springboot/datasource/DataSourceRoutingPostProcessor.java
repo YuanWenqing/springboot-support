@@ -45,21 +45,27 @@ class DataSourceRoutingPostProcessor implements BeanPostProcessor, ApplicationCo
         "Illegal datasource name: " + routing.value() + " on " + bean.getClass().getName());
     DataSource dataSource = findDataSource(routing.value());
     JdbcTemplate jdbcTemplate = findJdbcTemplate(routing.value());
-    if (bean instanceof JdbcTemplateAware) {
-      ((JdbcTemplateAware) bean).setJdbcTemplate(jdbcTemplate);
-    } else if (bean instanceof DataSourceAware) {
+    boolean dsSet = false;
+    boolean jtSet = false;
+    if (bean instanceof DataSourceAware) {
       ((DataSourceAware) bean).setDataSource(dataSource);
+      dsSet = true;
     } else {
       // try set datasource by setter
-      boolean dsSet = trySet(bean, SETTER_DATA_SOURCE, dataSource);
+      dsSet = trySet(bean, SETTER_DATA_SOURCE, dataSource);
+    }
+    if (bean instanceof JdbcTemplateAware) {
+      ((JdbcTemplateAware) bean).setJdbcTemplate(jdbcTemplate);
+      jtSet = true;
+    } else {
       // try set jdbcTemplate by setter
-      boolean jtSet = trySet(bean, SETTER_JDBC_TEMPLATE, jdbcTemplate);
-      if (!dsSet && !jtSet) {
-        // no way to set, trigger an exception for unhandled DataSourceRouting annotation
-        // TODO use a proper spring exception
-        throw new RuntimeException("no way to set a DataSource or JdbcTemplate to bean " + bean,
-            null);
-      }
+      jtSet = trySet(bean, SETTER_JDBC_TEMPLATE, jdbcTemplate);
+    }
+    if (!dsSet && !jtSet) {
+      // nothing set, trigger an exception for unhandled DataSourceRouting annotation
+      // TODO use a proper spring exception
+      throw new RuntimeException("no way to set a DataSource or JdbcTemplate to bean " + bean,
+          null);
     }
     return bean;
   }
