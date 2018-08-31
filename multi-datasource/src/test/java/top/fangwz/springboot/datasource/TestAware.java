@@ -2,7 +2,6 @@ package top.fangwz.springboot.datasource;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,13 +61,33 @@ public class TestAware {
     }
   }
 
+  @DataSourceRouting("a")
+  @Component
+  public static class AwareBySetterBean {
+    DataSource dataSource;
+    JdbcTemplate jdbcTemplate;
+
+    public void setDataSource(DataSource dataSource) {
+      this.dataSource = dataSource;
+    }
+
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+      this.jdbcTemplate = jdbcTemplate;
+    }
+  }
+
   @Autowired
   private DataSourceAwareBean dataSourceAwareBean;
   @Autowired
   private JdbcTemplateAwareBean jdbcTemplateAwareBean;
   @Autowired
+  private AwareBySetterBean awareBySetterBean;
+  @Autowired
   @Qualifier("aDataSource")
   private DataSource aDataSource;
+  @Autowired
+  @Qualifier("aJdbcTemplate")
+  private JdbcTemplate aJdbcTemplate;
   @Autowired
   @Qualifier("bJdbcTemplate")
   private JdbcTemplate bJdbcTemplate;
@@ -87,9 +106,16 @@ public class TestAware {
     assertEquals(bJdbcTemplate, jdbcTemplateAwareBean.jdbcTemplate);
   }
 
+  @Test
+  public void testAwareBySetterBean() {
+    assertNotNull(awareBySetterBean.dataSource);
+    assertEquals(aDataSource, awareBySetterBean.dataSource);
+    assertNotNull(awareBySetterBean.jdbcTemplate);
+    assertEquals(aJdbcTemplate, awareBySetterBean.jdbcTemplate);
+  }
+
   @DataSourceRouting("a")
   public class NotOfRequiredTypeBean {
-
   }
 
   @Test
@@ -98,7 +124,7 @@ public class TestAware {
       NotOfRequiredTypeBean bean = new NotOfRequiredTypeBean();
       dataSourceRoutingPostProcessor
           .postProcessBeforeInitialization(bean, bean.getClass().getName());
-    } catch (BeanNotOfRequiredTypeException e) {
+    } catch (RuntimeException e) {
       System.err.println(e.getMessage());
     }
   }
