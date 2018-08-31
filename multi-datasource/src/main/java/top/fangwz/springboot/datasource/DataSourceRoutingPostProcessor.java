@@ -1,7 +1,9 @@
 package top.fangwz.springboot.datasource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
@@ -10,6 +12,9 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.beans.PropertyChangeEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -18,6 +23,9 @@ import static com.google.common.base.Preconditions.*;
  * @date: 2018/8/2
  */
 class DataSourceRoutingPostProcessor implements BeanPostProcessor, ApplicationContextAware {
+  private static final String SETTER_DATA_SOURCE = "setDataSource";
+  private static final String SETTER_JDBC_TEMPLATE = "setJdbcTemplate";
+
   private ApplicationContext applicationContext;
 
   @Override
@@ -36,16 +44,38 @@ class DataSourceRoutingPostProcessor implements BeanPostProcessor, ApplicationCo
     checkArgument(
         StringUtils.isNotBlank(routing.value()) && !StringUtils.containsWhitespace(routing.value()),
         "Illegal datasource name: " + routing.value() + " on " + bean.getClass().getName());
+    DataSource dataSource = findDataSource(routing.value());
+    JdbcTemplate jdbcTemplate = findJdbcTemplate(routing.value());
     if (bean instanceof JdbcTemplateAware) {
-      JdbcTemplate jdbcTemplate = findJdbcTemplate(routing.value());
       ((JdbcTemplateAware) bean).setJdbcTemplate(jdbcTemplate);
     } else if (bean instanceof DataSourceAware) {
-      DataSource dataSource = findDataSource(routing.value());
       ((DataSourceAware) bean).setDataSource(dataSource);
     } else {
-      throw new BeanNotOfRequiredTypeException(beanName, RoutingAware.class, bean.getClass());
+      // try set datasource by setter
+      boolean dsSet = trySet(bean, SETTER_DATA_SOURCE, dataSource);
+      // try set jdbcTemplate by setter
+      boolean jtSet = trySet(bean, SETTER_JDBC_TEMPLATE, jdbcTemplate);
+      if (!dsSet && !jtSet) {
+        // no way to set, trigger an exception for unhandled DataSourceRouting annotation
+        throw new BeanNotOfRequiredTypeException(beanName, RoutingAware.class, bean.getClass());
+      }
     }
     return bean;
+  }
+
+  private boolean trySet(Object bean, String setterName, Object value) {
+    Method method =
+        MethodUtils.getMatchingAccessibleMethod(bean.getClass(), setterName, value.getClass());
+    if (method == null) {
+      return false;
+    }
+    try {
+      method.invoke(bean, value);
+      return true;
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new MethodInvocationException(new PropertyChangeEvent(bean, setterName, null, value),
+          e);
+    }
   }
 
   private JdbcTemplate findJdbcTemplate(String baseName) {
