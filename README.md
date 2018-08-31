@@ -70,6 +70,31 @@ bean also must satisfied one of the following convention:
 * implement interface `DataSourceAware` or `JdbcTemplateAware`.
 * own a method named as `setDataSource` or `setJdbcTemplate`.
 
+Example:
+
+~~~java
+@DataSourceRouting("a")
+public class JdbcTemplateAwareBean implements JdbcTemplateAware {
+  private JdbcTemplate jdbcTemplate;
+  @Override
+  public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
+  }
+}
+~~~
+
+or
+
+~~~java
+@DataSourceRouting("a")
+public class JdbcTemplateSetterBean {
+  private JdbcTemplate jdbcTemplate;
+  public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
+  }
+}
+~~~
+
 Injection of DataSource and JdbcTemplate is processed by `DataSourceRoutingPostProcessor`,
 which will detect interfaces and methods introduced above and do the injection. 
 
