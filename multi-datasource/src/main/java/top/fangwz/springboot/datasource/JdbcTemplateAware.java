@@ -1,13 +1,12 @@
 package top.fangwz.springboot.datasource;
 
-import org.springframework.beans.factory.Aware;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author: yuanwq
  * @date: 2018/8/2
  */
-public interface JdbcTemplateAware extends Aware {
+public interface JdbcTemplateAware extends DataSourceRoutingAware {
 
   void setJdbcTemplate(JdbcTemplate jdbcTemplate);
 }

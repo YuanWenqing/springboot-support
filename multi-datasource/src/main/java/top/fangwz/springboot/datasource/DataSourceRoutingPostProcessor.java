@@ -43,7 +43,8 @@ public class DataSourceRoutingPostProcessor implements BeanPostProcessor, Applic
       DataSource dataSource = findDataSource(routing.value());
       ((DataSourceAware) bean).setDataSource(dataSource);
     } else {
-      throw new BeanNotOfRequiredTypeException(beanName, JdbcTemplateAware.class, bean.getClass());
+      throw new BeanNotOfRequiredTypeException(beanName, DataSourceRoutingAware.class,
+          bean.getClass());
     }
     return bean;
   }
