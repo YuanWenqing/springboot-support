@@ -13,10 +13,9 @@ import static com.google.common.base.Preconditions.*;
  * @author: yuanwq
  * @date: 2018/8/29
  */
-@ConfigurationProperties(MultiDataSourceProperties.PROPERTIES_PREFIX)
+@ConfigurationProperties("multi-datasource")
 @Data
 public class MultiDataSourceProperties {
-  public static final String PROPERTIES_PREFIX = "top.fangwz.springboot.datasource";
 
   private Map<String, DataSourceProperties> multi = Maps.newLinkedHashMap();
 

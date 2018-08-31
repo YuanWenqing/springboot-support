@@ -37,7 +37,7 @@ public @interface EnableMultiDataSource {
   /**
    * 配置项前缀
    */
-  String prefix() default MultiDataSourceProperties.PROPERTIES_PREFIX;
+  String prefix() default "multi-datasource.multi";
 
   /**
    * 处理配置文件的类

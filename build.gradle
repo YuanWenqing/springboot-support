@@ -19,7 +19,7 @@ ext {
 // project setting
 subprojects {
     group = "top.fangwz.springboot"
-    version = "0.1.0"
+    version = "0.2.0"
 
     repositories {
         mavenLocal()
@@ -49,6 +49,31 @@ subprojects {
     test << {
         println test.reports.html.entryPoint
     }
+
+    apply plugin: "maven-publish"
+    afterEvaluate {
+        task sourcesJar(type: Jar) {
+            from sourceSets.main.allJava
+            classifier = 'sources'
+        }
+        publishing.publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifactId project.archivesBaseName
+                version project.version
+
+                artifact sourcesJar
+            }
+        }
+        task local {
+            dependsOn publishToMavenLocal
+            doLast {
+                def pub = publishing.publications.mavenJava
+                println "artifact: ${pub.groupId}:${pub.artifactId}:${pub.version}"
+            }
+        }
+    }
+
 
     dependencies {
 
