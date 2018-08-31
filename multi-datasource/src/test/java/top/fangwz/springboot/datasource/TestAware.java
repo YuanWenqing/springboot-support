@@ -125,7 +125,7 @@ public class TestAware {
       NotOfRequiredTypeBean bean = new NotOfRequiredTypeBean();
       dataSourceRoutingPostProcessor
           .postProcessBeforeInitialization(bean, bean.getClass().getName());
-    } catch (BeanNotOfRequiredTypeException e) {
+    } catch (RuntimeException e) {
       System.err.println(e.getMessage());
     }
   }
