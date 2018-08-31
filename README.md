@@ -38,8 +38,8 @@ In purpose to specify your configuration of multi-datasource, inside `EnableMult
 Configuration properties is parsed by `PropertiesParser`. As a convention, every item will be treated in a `<prefix>.<name>.<property>` pattern:
 
 * `prefix`: `prefix` defined in `EnableMultiDataSource`
-* `name`: prefix of bean name for DataSource and JdbcTemplate, thus generating bean names in pattern `<name>DataSource` and `<name>JdbcTemplate`
-* `property`: property name in `DataSourceProperties`; We reuse utilized classes `DataSourceProperties` and `DataSourceBuilder` in SpringBoot to construct `DataSource` and `JdbcTemplate`
+* `name`: base name of DataSource and JdbcTemplate beans, thus generating bean names in pattern `<name>DataSource` and `<name>JdbcTemplate`
+* `property`: property name in `DataSourceProperties`; We reuse utilized classes `DataSourceProperties` and `DataSourceBuilder` in SpringBoot to construct DataSource and JdbcTemplate
 
 Example:
 
@@ -57,8 +57,21 @@ multi-datasource.multi.b.driver-class-name=com.mysql.cj.jdbc.Driver
 
 This will lead to construction of:
 
-* 2 `DataSource`s with bean names: `aDataSource` and `bDataSource`
-* 2 `JdbcTemplate`s with bean names: `aJdbcTemplate` and `bJdbcTemplate`
+* 2 DataSources with bean names: `aDataSource` and `bDataSource`
+* 2 JdbcTemplates with bean names: `aJdbcTemplate` and `bJdbcTemplate`
+
+### How To Inject DataSource/JdbcTemplate?
+
+Beans depending on a DataSource or JdbcTemplate must be annotated by `DataSourceRouting`,
+and `value` should be one of base names parsed from configuration properties.
+Besides, to accept DataSource or JdbcTemplate specified by `DataSourceRouting`,
+bean also must satisfied one of the following convention: 
+
+* implement interface `DataSourceAware` or `JdbcTemplateAware`.
+* own a method named as `setDataSource` or `setJdbcTemplate`.
+
+Injection of DataSource and JdbcTemplate is processed by `DataSourceRoutingPostProcessor`,
+which will detect interfaces and methods introduced above and do the injection. 
 
 ### Others You May Need To Know
 
