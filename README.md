@@ -10,8 +10,9 @@ Support multi-datasource for SpringBoot.
 Just do it in a SpringBoot way:
 
 ~~~java
+@Configuration
 @EnableMultiDataSource
-public class Configuration {
+public class XXXConfiguration {
   // code...
 }
 ~~~
@@ -22,25 +23,23 @@ or
 @SpringBootApplication
 @EnableMultiDataSource
 public class XXXApplication {
-  // code..
+  // code...
 }
 ~~~
 
-In purpose to customize your configuration of multi-datasource, you can change:
+In purpose to specify your configuration of multi-datasource, inside `EnableMultiDataSource` you can change:
 
 * `location`: location of configuration properties, default `classpath:application.properties`.
 * `prefix`: prefix of configuration, default `multi-datasource.multi`.
-* `loader`: class of loader to load configuration properties, default `DefaultPropertiesLoader`; If some ConfigurationService, like Spring Cloud Config or Aliyun ACM, is in use, change `loader` to a customized loader class implementing `PropertiesLoader` interface to load in your way  
+* `loader`: class of loader to load configuration properties, default `DefaultPropertiesLoader`; If some ConfigurationService, like Spring Cloud Config or Aliyun ACM, is in use, change `loader` to a customized loader class implementing `PropertiesLoader` interface to load it in your way.  
 
 ### How To Configure Multi-DataSource?
 
-Configuration will be parsed by `PropertiesParser`. As a convention, every item will be treated in a `<prefix>.<name>.<property>` pattern:
+Configuration properties is parsed by `PropertiesParser`. As a convention, every item will be treated in a `<prefix>.<name>.<property>` pattern:
 
 * `prefix`: `prefix` defined in `EnableMultiDataSource`
-* `name`: prefix of bean name for DataSource and JdbcTemplate, thus generating `<name>DataSource` and `<name>JdbcTemplate`
-* `property`: property name in `DataSourceProperties`
-
-We reuse utilized classes `DataSourceProperties` and `DataSourceBuilder` in SpringBoot to construct `DataSource` and `JdbcTemplate`
+* `name`: prefix of bean name for DataSource and JdbcTemplate, thus generating bean names in pattern `<name>DataSource` and `<name>JdbcTemplate`
+* `property`: property name in `DataSourceProperties`; We reuse utilized classes `DataSourceProperties` and `DataSourceBuilder` in SpringBoot to construct `DataSource` and `JdbcTemplate`
 
 Example:
 
