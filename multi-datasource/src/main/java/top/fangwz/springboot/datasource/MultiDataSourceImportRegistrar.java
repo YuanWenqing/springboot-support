@@ -32,8 +32,6 @@ import java.util.Properties;
  */
 public class MultiDataSourceImportRegistrar
     implements ImportBeanDefinitionRegistrar, ResourceLoaderAware {
-  private static final String SUFFIX_DATA_SOURCE = "DataSource";
-  private static final String SUFFIX_JDBC_TEMPLATE = "JdbcTemplate";
 
   private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
@@ -88,7 +86,7 @@ public class MultiDataSourceImportRegistrar
   private void registerDataSourceAndJdbc(MultiDataSourceProperties properties,
       BeanDefinitionRegistry registry) {
     for (Map.Entry<String, DataSourceProperties> entry : properties.getMulti().entrySet()) {
-      String dataSourceName = entry.getKey() + SUFFIX_DATA_SOURCE;
+      String dataSourceName = DataSourceUtils.generateDataSourceBeanName(entry.getKey());
       DataSource dataSource = entry.getValue().initializeDataSourceBuilder().build();
       BeanDefinition dataSourceBean = BeanDefinitionBuilder
           .genericBeanDefinition(DataSource.class, Suppliers.ofInstance(dataSource))
@@ -96,7 +94,7 @@ public class MultiDataSourceImportRegistrar
       registry.registerBeanDefinition(dataSourceName, dataSourceBean);
       BeanDefinition jdbcBean = BeanDefinitionBuilder.genericBeanDefinition(JdbcTemplate.class)
           .addConstructorArgReference(dataSourceName).getBeanDefinition();
-      String jdbcName = entry.getKey() + SUFFIX_JDBC_TEMPLATE;
+      String jdbcName = DataSourceUtils.generateJdbcTemplateBeanName(entry.getKey());
       registry.registerBeanDefinition(jdbcName, jdbcBean);
     }
   }
