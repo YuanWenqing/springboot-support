@@ -3,8 +3,15 @@ package top.fangwz.springboot.datasource;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyNameAliases;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 
-import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -51,41 +58,26 @@ public class PropertiesParser {
 
   private DataSourceProperties parseDataSourceProperties(Properties properties, String prefixDot) {
     DataSourceProperties dataSourceProperties = new DataSourceProperties();
+    Map<String, String> map = new HashMap<>();
     for (Object key : properties.keySet()) {
       String keyStr = String.valueOf(key);
       if (keyStr.startsWith(prefixDot)) {
         String propName = StringUtils.substringAfter(keyStr, prefixDot);
-        setDataSourceProperties(dataSourceProperties, propName, properties.getProperty(keyStr));
+        map.put(propName, properties.getProperty(keyStr));
       }
     }
+    bind(dataSourceProperties, map);
     return dataSourceProperties;
   }
 
-  @SuppressWarnings("unchecked")
-  private void setDataSourceProperties(DataSourceProperties dataSourceProperties, String propName,
-      String propValue) {
-    // TODO: use spring-way to set property
-    switch (propName) {
-      case "url":
-        dataSourceProperties.setUrl(propValue);
-        break;
-      case "username":
-        dataSourceProperties.setUsername(propValue);
-        break;
-      case "password":
-        dataSourceProperties.setPassword(propValue);
-        break;
-      case "driver-class-name":
-        dataSourceProperties.setDriverClassName(propValue);
-        break;
-      case "type":
-        try {
-          dataSourceProperties.setType((Class<? extends DataSource>) Class.forName(propValue));
-        } catch (ClassNotFoundException e) {
-          throw new RuntimeException(e);
-        }
-      default:
-        break;
-    }
+  private void bind(DataSourceProperties dataSourceProperties, Map<String, String> map) {
+    // learn from DataSourceBuilder.build()
+    ConfigurationPropertySource source = new MapConfigurationPropertySource(map);
+    ConfigurationPropertyNameAliases aliases = new ConfigurationPropertyNameAliases();
+    aliases.addAliases("url", "jdbc-url");
+    aliases.addAliases("username", "user");
+    Binder binder = new Binder(source.withAliases(aliases));
+    binder.bind(ConfigurationPropertyName.EMPTY, Bindable.ofInstance(dataSourceProperties));
   }
+
 }
