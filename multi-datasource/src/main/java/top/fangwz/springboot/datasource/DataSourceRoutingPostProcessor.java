@@ -95,8 +95,4 @@ class DataSourceRoutingPostProcessor implements BeanPostProcessor, ApplicationCo
     return applicationContext.getBean(beanName, DataSource.class);
   }
 
-  @Override
-  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-    return bean;
-  }
 }
