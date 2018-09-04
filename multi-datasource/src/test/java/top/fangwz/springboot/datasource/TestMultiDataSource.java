@@ -1,6 +1,7 @@
 package top.fangwz.springboot.datasource;
 
 import com.google.common.base.Splitter;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +49,14 @@ public class TestMultiDataSource {
         .forEach(sql -> aJdbcTemplate.execute(sql));
     Map<String, Object> map = aJdbcTemplate.queryForMap("select * from user where id =1");
     assertEquals("a", map.get("name"));
+  }
+
+  @Test
+  public void testHikari() {
+    DataSource dataSource = bJdbcTemplate.getDataSource();
+    assertTrue(dataSource instanceof HikariDataSource);
+    HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
+    assertEquals(3, hikariDataSource.getMaximumPoolSize());
   }
 
   private String readInitSql() throws IOException {
