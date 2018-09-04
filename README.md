@@ -35,24 +35,33 @@ In purpose to specify your configuration of multi-datasource, inside `EnableMult
 
 ### How To Configure Multi-DataSource?
 
-Configuration properties is parsed by `PropertiesParser`. As a convention, every item will be treated in a `<prefix>.<name>.<property>` pattern:
+Configuration properties is parsed by `PropertiesParser`. As a convention, every item will be treated in a `<prefix>.<name>.<config>.<property>` pattern:
 
 * `prefix`: `prefix` defined in `EnableMultiDataSource`
 * `name`: base name of DataSource and JdbcTemplate beans, thus generating bean names in pattern `<name>DataSource` and `<name>JdbcTemplate`
+* `config`: a sub-name for detail config properties of DataSource, candidates is below
+  * `datasource`: basic config properties, bind to `DataSourceProperties`
+  * `hikari`: Hikari config, bind to `com.zaxxer.hikari.HikariDataSource`
+  * `tomcat`: Tomcat config, bind to `org.apache.tomcat.jdbc.pool.DataSource`
+  * `dbcp2`: Dbcp2 config, bind to `org.apache.commons.dbcp2.BasicDataSource`
 * `property`: property name in `DataSourceProperties`; We reuse utilized classes `DataSourceProperties` and `DataSourceBuilder` in SpringBoot to construct DataSource and JdbcTemplate
+
+Type of DataSource will be determined by SpringBoot automatically if not specified in properties,
+just like `spring-boot-starter-jdbc` does.
 
 Example:
 
 ~~~properties
-multi-datasource.multi.a.url = jdbc:mysql://localhost:3306/test
-multi-datasource.multi.a.username=test
-multi-datasource.multi.a.password=123456
-multi-datasource.multi.a.driver-class-name=com.mysql.cj.jdbc.Driver
+multi-datasource.multi.a.datasource.url = jdbc:mysql://localhost:3306/test
+multi-datasource.multi.a.datasource.username=test
+multi-datasource.multi.a.datasource.password=123456
+multi-datasource.multi.a.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-multi-datasource.multi.b.url = jdbc:mysql://localhost:3306/test
-multi-datasource.multi.b.username=test
-multi-datasource.multi.b.password=123456
-multi-datasource.multi.b.driver-class-name=com.mysql.cj.jdbc.Driver
+multi-datasource.multi.b.datasource.url = jdbc:mysql://localhost:3306/test
+multi-datasource.multi.b.datasource.username=test
+multi-datasource.multi.b.datasource.password=123456
+multi-datasource.multi.b.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+multi-datasource.multi.b.hikari.maximum-pool-size = 3
 ~~~
 
 This will lead to construction of:
@@ -98,6 +107,4 @@ public class JdbcTemplateSetterBean {
 Injection of DataSource and JdbcTemplate is processed by `DataSourceRoutingPostProcessor`,
 which will detect interfaces and methods introduced above and do the injection. 
 
-### Others You May Need To Know
 
-Type of DataSource will be determined by SpringBoot automatically, just like `spring-boot-starter-jdbc` does.

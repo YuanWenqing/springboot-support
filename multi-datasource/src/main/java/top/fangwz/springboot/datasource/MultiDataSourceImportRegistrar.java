@@ -5,7 +5,6 @@ import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -55,9 +54,8 @@ class MultiDataSourceImportRegistrar implements ImportBeanDefinitionRegistrar, R
       // TODO: find a proper spring exception
       throw new RuntimeException("fail to load multi-datasource properties configuration", e);
     }
-    MultiDataSourceProperties multiDataSourceProperties = new MultiDataSourceProperties();
     PropertiesParser parser = createParser(attributes);
-    parser.parse(properties, multiDataSourceProperties);
+    MultiDataSourceProperties multiDataSourceProperties = parser.parse(properties);
     registerDataSourceAndJdbc(multiDataSourceProperties, registry);
   }
 
@@ -84,17 +82,22 @@ class MultiDataSourceImportRegistrar implements ImportBeanDefinitionRegistrar, R
 
   private void registerDataSourceAndJdbc(MultiDataSourceProperties properties,
       BeanDefinitionRegistry registry) {
-    for (Map.Entry<String, DataSourceProperties> entry : properties.getMulti().entrySet()) {
-      String dataSourceName = DataSourceUtils.generateDataSourceBeanName(entry.getKey());
-      DataSource dataSource = entry.getValue().initializeDataSourceBuilder().build();
+    for (Map.Entry<String, MultiDataSourceProperties.CompositeProperties> entry : properties
+        .getMulti().entrySet()) {
+      String baseName = entry.getKey();
+      MultiDataSourceProperties.CompositeProperties compositeProperties = entry.getValue();
+      String dsBeanName = DataSourceUtils.generateDataSourceBeanName(baseName);
+      DataSource dataSource =
+          compositeProperties.getDataSourceProperties().initializeDataSourceBuilder().build();
+      compositeProperties.bindProperty(dataSource);
       BeanDefinition dataSourceBean = BeanDefinitionBuilder
           .genericBeanDefinition(DataSource.class, Suppliers.ofInstance(dataSource))
           .getBeanDefinition();
-      registry.registerBeanDefinition(dataSourceName, dataSourceBean);
+      registry.registerBeanDefinition(dsBeanName, dataSourceBean);
       BeanDefinition jdbcBean = BeanDefinitionBuilder.genericBeanDefinition(JdbcTemplate.class)
-          .addConstructorArgReference(dataSourceName).getBeanDefinition();
-      String jdbcName = DataSourceUtils.generateJdbcTemplateBeanName(entry.getKey());
-      registry.registerBeanDefinition(jdbcName, jdbcBean);
+          .addConstructorArgReference(dsBeanName).getBeanDefinition();
+      String jdbcBeanName = DataSourceUtils.generateJdbcTemplateBeanName(baseName);
+      registry.registerBeanDefinition(jdbcBeanName, jdbcBean);
     }
   }
 

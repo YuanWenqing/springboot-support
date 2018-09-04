@@ -17,10 +17,9 @@ public class TestPropertiesParser {
     PropertiesParser parser = new PropertiesParser();
     parser.setPrefix("p");
     Properties properties = new Properties();
-    properties.setProperty("p.a.url", "aaa");
-    properties.setProperty("p.a.type", HikariDataSource.class.getName());
-    MultiDataSourceProperties multiDataSourceProperties = new MultiDataSourceProperties();
-    parser.parse(properties, multiDataSourceProperties);
+    properties.setProperty("p.a.datasource.url", "aaa");
+    properties.setProperty("p.a.datasource.type", HikariDataSource.class.getName());
+    MultiDataSourceProperties multiDataSourceProperties = parser.parse(properties);
     assertEquals(1, multiDataSourceProperties.getMulti().size());
     assertNotNull(multiDataSourceProperties.getDataSourceProperties("a"));
     assertEquals("aaa", multiDataSourceProperties.getDataSourceProperties("a").getUrl());
@@ -33,10 +32,9 @@ public class TestPropertiesParser {
     PropertiesParser parser = new PropertiesParser();
     parser.setPrefix("");
     Properties properties = new Properties();
-    properties.setProperty("a.url", "aaa");
-    properties.setProperty("a.type", HikariDataSource.class.getName());
-    MultiDataSourceProperties multiDataSourceProperties = new MultiDataSourceProperties();
-    parser.parse(properties, multiDataSourceProperties);
+    properties.setProperty("a.datasource.url", "aaa");
+    properties.setProperty("a.datasource.type", HikariDataSource.class.getName());
+    MultiDataSourceProperties multiDataSourceProperties = parser.parse(properties);
     assertEquals(1, multiDataSourceProperties.getMulti().size());
     assertNotNull(multiDataSourceProperties.getDataSourceProperties("a"));
     assertEquals("aaa", multiDataSourceProperties.getDataSourceProperties("a").getUrl());
@@ -48,13 +46,13 @@ public class TestPropertiesParser {
   public void testWrongType() {
     PropertiesParser parser = new PropertiesParser();
     Properties properties = new Properties();
-    properties.setProperty("a.type", "a");
-    MultiDataSourceProperties multiDataSourceProperties = new MultiDataSourceProperties();
+    properties.setProperty("a.datasource.type", "a");
     try {
-      parser.parse(properties, multiDataSourceProperties);
+      MultiDataSourceProperties multiDataSourceProperties = parser.parse(properties);
+      multiDataSourceProperties.getDataSourceProperties("a");
       fail();
     } catch (RuntimeException e) {
-      System.out.println(e.getClass() + ": " + e.getMessage());
+      System.err.println(e.getClass() + ": " + e.getMessage());
     }
   }
 
