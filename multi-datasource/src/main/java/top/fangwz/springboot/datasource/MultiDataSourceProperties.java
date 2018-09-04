@@ -1,8 +1,10 @@
 package top.fangwz.springboot.datasource;
 
 import com.google.common.collect.Maps;
+import lombok.Data;
 import lombok.Getter;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
@@ -46,7 +48,7 @@ class MultiDataSourceProperties {
 
     public DataSourceProperties getDataSourceProperties() {
       Map<String, String> properties =
-          propertiesMap.getOrDefault("datasource", Collections.emptyMap());
+          propertiesMap.getOrDefault(ConfigNaming.DATASOURCE, Collections.emptyMap());
       // learn from DataSourceBuilder.build()
       DataSourceProperties dataSourceProperties = new DataSourceProperties();
       ConfigurationPropertySource source = new MapConfigurationPropertySource(properties);
@@ -61,12 +63,12 @@ class MultiDataSourceProperties {
     public void bindProperty(DataSource dataSource) {
       Map<String, String> properties = null;
       if ("com.zaxxer.hikari.HikariDataSource".equals(dataSource.getClass().getName())) {
-        properties = propertiesMap.get("hikari");
+        properties = propertiesMap.get(ConfigNaming.HIKARI);
       } else if ("org.apache.tomcat.jdbc.pool.DataSource".equals(dataSource.getClass().getName())) {
-        properties = propertiesMap.get("tomcat");
+        properties = propertiesMap.get(ConfigNaming.TOMCAT);
       } else if ("org.apache.commons.dbcp2.BasicDataSource"
           .equals(dataSource.getClass().getName())) {
-        properties = propertiesMap.get("dbcp2");
+        properties = propertiesMap.get(ConfigNaming.DBCP2);
       }
       if (properties != null && !properties.isEmpty()) {
         ConfigurationPropertySource source = new MapConfigurationPropertySource(properties);
@@ -74,5 +76,33 @@ class MultiDataSourceProperties {
         binder.bind(ConfigurationPropertyName.EMPTY, Bindable.ofInstance(dataSource));
       }
     }
+  }
+
+  private interface ConfigNaming {
+    String DATASOURCE = "datasource";
+    String HIKARI = "hikari";
+    String TOMCAT = "tomcat";
+    String DBCP2 = "dbcp2";
+  }
+
+  /**
+   * 用来生成{@code application.properties}中的配置项提示，不用做逻辑中
+   * <p>
+   * {@code DataSource}类型在实际使用中才能确定，这里只用做编译。
+   * <p>
+   * 注意：命名方式与 {@link ConfigNaming} 定义保持一致
+   */
+  @ConfigurationProperties("multi-datasource")
+  @Data
+  private static class MultiConfigurationProperties {
+    @Data
+    private static class SingleConfigurationProperties {
+      private DataSourceProperties datasource;
+      private com.zaxxer.hikari.HikariDataSource hikari;
+      private org.apache.tomcat.jdbc.pool.DataSource tomcat;
+      private org.apache.commons.dbcp2.BasicDataSource dbcp2;
+    }
+
+    private Map<String, SingleConfigurationProperties> multi = Collections.emptyMap();
   }
 }
