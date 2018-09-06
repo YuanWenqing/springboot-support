@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,7 +20,6 @@ import static org.junit.Assert.*;
  * @date: 2018/8/31
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
 @ContextConfiguration(classes = TestAware.ConfigurationForTest.class)
 public class TestAware {
   @Configuration
